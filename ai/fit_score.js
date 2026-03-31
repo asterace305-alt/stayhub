@@ -5,10 +5,8 @@
 
 /**
  * Generate weights from the user's priority ranking.
- *
- * @param {string[]} priorityOrder - e.g. ['food', 'distance', 'budget', 'curfew', 'wifi']
- *   Must contain exactly these 5 strings in the order of importance (index 0 = most important).
- * @returns {Object} - { budget: 0.25, distance: 0.18, food: 0.30, wifi: 0.07, curfew: 0.10, verified: 0.10 }
+ * @param {string[]} priorityOrder - 5 strings: 'food', 'distance', 'budget', 'curfew', 'wifi' (index 0 = most important)
+ * @returns {Object} weight per factor (sums to 1.0, includes fixed 'verified' at 0.10)
  */
 function generateWeights(priorityOrder) {
     const shares = [0.30, 0.25, 0.18, 0.10, 0.07]; // rank #1 → #5
@@ -25,32 +23,27 @@ function generateWeights(priorityOrder) {
 /**
  * Calculate the fit score for a single PG against a student's preferences.
  *
- * @param {Object} studentPrefs - Student's preferences
- *   {
- *     budget: 8000,               // max monthly rent (₹)
- *     max_distance: 2.0,          // max acceptable distance in km
- *     needs_food: true,           // does the student need food included?
- *     curfew: 'no_curfew',        // 'strict' | 'moderate' | 'no_curfew'
- *     gender: 'female',           // 'male' | 'female' — used for pre-filtering only
- *     priorities: ['food', 'budget', 'distance', 'curfew', 'wifi']  // ranked #1 → #5
- *   }
+ * @param {Object} studentPrefs
+ *   - budget (number)         max monthly rent in ₹
+ *   - max_distance (number)   max acceptable distance in km
+ *   - needs_food (boolean)    does the student need food included?
+ *   - curfew (string)         'strict' | 'moderate' | 'no_curfew'
+ *   - gender (string)         'male' | 'female'
+ *   - priorities (string[])   ranked #1 → #5
  *
- * @param {Object} pg - PG/Hostel data
- *   {
- *     name: 'Sunshine PG',
- *     area: 'Katraj',
- *     rent: 7000,
- *     food: true,                 // food included?
- *     wifi: true,                 // high-speed wifi available?
- *     curfew: 'no_curfew',        // 'strict' | 'moderate' | 'no_curfew'
- *     occupantType: 'female',     // 'male' | 'female' | 'unisex'
- *     distance_bibwewadi: 1.2,    // km from Bibwewadi campus
- *     distance_kondhwa: 2.5,      // km from Kondhwa campus
- *     tier: 'verified',           // 'premium' | 'verified' | 'basic'
- *   }
+ * @param {Object} pg
+ *   - name (string)
+ *   - area (string)
+ *   - rent (number)
+ *   - food (boolean)              food included?
+ *   - wifi (boolean)              high-speed wifi available?
+ *   - curfew (string)             'strict' | 'moderate' | 'no_curfew'
+ *   - occupantType (string)       'male' | 'female' | 'unisex'
+ *   - distance_bibwewadi (number) km from Bibwewadi campus
+ *   - distance_kondhwa (number)   km from Kondhwa campus
+ *   - tier (string)               'premium' | 'verified' | 'basic'
  *
  * @param {string} campus - 'bibwewadi' | 'kondhwa'
- *
  * @returns {{ score: number, breakdown: Object, issues: string[] }}
  */
 function calculateFitScore(studentPrefs, pg, campus) {
